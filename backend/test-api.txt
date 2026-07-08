@@ -1,0 +1,60 @@
+# Health check 
+sleep 3 && curl -s http://localhost:8000/health 2>&1
+{"status":"healthy","service":"payment-fraud-detection"}
+
+
+curl -s -X POST http://localhost:8000/fraud-check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messageId": "py-test-001",
+    "debtorAccount": {"sortCode": "101010", "accountNumber": "10000001", "accountName": "Test Debtor"},
+    "creditorAccount": {"sortCode": "505050", "accountNumber": "50000001", "accountName": "Test Creditor"},
+    "amount": 150.00,
+    "currency": "GBP",
+    "paymentReference": "test",
+    "confirmationOfPayee": {"result": "MATCH", "matchedName": "Test Creditor"},
+    "channel": {"type": "MOBILE", "deviceId": null, "geoLocation": null, "sessionDuration": null},
+    "timestamp": "2026-06-16T10:00:00Z"
+  }' 2>&1 | python3 -m json.tool
+
+  
+{
+    "messageId": "py-test-001",
+    "decision": "ALLOW",
+    "riskScore": 10,
+    "breakdown": {
+        "amountScore": 0,
+        "copScore": 0,
+        "behaviouralScore": 0,
+        "channelScore": 10
+    },
+    "riskFactors": [
+        {
+            "category": "channel",
+            "explanation": "Channel risk (score=10): unknown device"
+        }
+    ],
+    "timestamp": "2026-06-18T06:46:25.474057+00:00"
+}
+
+
+
+===
+{
+    "messageId": "py-test-001",
+    "decision": "ALLOW",
+    "riskScore": 10,
+    "breakdown": {
+        "amountScore": 0,
+        "copScore": 0,
+        "behaviouralScore": 0,
+        "channelScore": 10
+    },
+    "riskFactors": [
+        {
+            "category": "channel",
+            "explanation": "Channel risk (score=10): unknown device"
+        }
+    ],
+    "timestamp": "2026-06-18T06:46:25.474057+00:00"
+}
